@@ -11,7 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using Microsoft.EntityFrameworkCore;
 using System.Windows.Shapes;
+using System.Transactions;
 
 namespace TasksWPF
 {
@@ -22,14 +24,29 @@ namespace TasksWPF
     {
         List<Assignment> shownAssignments;
         AssignmentsController assignmentsController;
+        ApplicationContext db = new ApplicationContext();
         public MainWindow()
         {
             InitializeComponent();
             assignmentsController = new AssignmentsController();
+            Loaded += MainWindow_Loaded;
+            
             shownAssignments = new List<Assignment>();
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
             UpdateList();
             
+        }
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // гарантируем, что база данных создана
+            db.Database.EnsureCreated();
+            // загружаем данные из БД
+            db.Assignments.Load();
+            // и устанавливаем данные в качестве контекста
+            DataContext = db.Assignments.Local.ToObservableCollection();
+            assignmentsController.assignments = GetAll();
+            assignmentsController.Sort();
+            UpdateList();
         }
         void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
@@ -37,7 +54,13 @@ namespace TasksWPF
             {
                 if (inputBox.Text != "")
                 {
-                    assignmentsController.AddAssignment(new Assignment(inputBox.Text));
+                    Assignment task = new Assignment(inputBox.Text);
+
+                    assignmentsController.AddAssignment(task);
+                    db.Assignments.Add(task);
+                    
+                    db.SaveChanges();
+
                     inputBox.Text = "";
                 }
                     
@@ -45,6 +68,10 @@ namespace TasksWPF
             }
         }
 
+        private List<Assignment> GetAll()
+        {
+            return db.Assignments.ToList();
+        }
        
         private void UpdateList()
         {
@@ -68,7 +95,7 @@ namespace TasksWPF
             radioButton.FontSize = 16;
             radioButton.Content = assignment.Text;
             radioButton.IsChecked = assignment.isDone;
-            radioButton.Checked += (sender, e) => RadioButton_Checked(sender, e, assignment.Date);
+            radioButton.Checked += (sender, e) => RadioButton_Checked(sender, e, assignment.Id);
 
             
             smallPanel.Orientation = Orientation.Horizontal;
@@ -76,13 +103,13 @@ namespace TasksWPF
             label.FontSize = 12;
             label.Margin = new Thickness(14, 0, 0, 0);
             label.Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 106));
-            label.Content = assignment.Date.Date;
+            label.Content = assignment.Date.TimeOfDay;
             Button deleteButton = new Button();
             deleteButton.Background = Brushes.Transparent;
             deleteButton.BorderThickness = new Thickness(0);
             deleteButton.Foreground = new SolidColorBrush(Color.FromRgb(242, 59, 59));
             deleteButton.Content = "Delete";
-            deleteButton.Click += (sender, e) => deleteButton_clicked(sender, e, assignment.Date);
+            deleteButton.Click += (sender, e) => deleteButton_clicked(sender, e, assignment.Id);
             smallPanel.Children.Add(label);
             smallPanel.Children.Add(deleteButton);
 
@@ -96,14 +123,26 @@ namespace TasksWPF
             
         }
 
-        private void RadioButton_Checked(object sender, RoutedEventArgs e, DateTime date)
+        private void RadioButton_Checked(object sender, RoutedEventArgs e, int id)
         {
-            assignmentsController.CompleteAssignment(assignmentsController.assignments.Find(x => x.Date == date));
+            Assignment task = db.Assignments.Find(id);
+
+            task.isDone = true;
+            assignmentsController.CompleteAssignment(task);
+            db.SaveChanges();
+            
             UpdateList();
         }
-        private void deleteButton_clicked(object sender, RoutedEventArgs e, DateTime date)
+        private void deleteButton_clicked(object sender, RoutedEventArgs e, int id)
         {
-            assignmentsController.DeleteAssignment(assignmentsController.assignments.Find(x => x.Date == date));
+            if(MessageBox.Show("Are you sure to delete it?", "Deleting assignment", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                Assignment task = db.Assignments.Find(id);
+                assignmentsController.DeleteAssignment(task);
+                db.Assignments.Remove(task);
+                db.SaveChanges();
+            }
+            
             UpdateList();
         }
 

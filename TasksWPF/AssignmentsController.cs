@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace TasksWPF
 {
@@ -15,12 +16,14 @@ namespace TasksWPF
         }
         public List<Assignment> assignments;
 
+
         public int Incompleted = 0;
         public void AddAssignment(Assignment assignment)
         {
             assignments.Insert(0, assignment);
             Incompleted++;
         }
+
         public void DeleteAssignment(Assignment assignment)
         {
             if(!assignment.isDone)
@@ -30,12 +33,33 @@ namespace TasksWPF
         }
         public void CompleteAssignment(Assignment assignment)
         {
-            
-           
             assignments.Remove(assignment);
             assignment.isDone = true;
             assignments.Insert(assignments.Count, assignment);
             Incompleted--;
+        }
+        public void Sort()
+        {
+            assignments.OrderByDescending(d => d.Date);
+            assignments.Reverse();
+            foreach(var assignment in assignments)
+            {
+                if (!assignment.isDone)
+                {
+                    Incompleted++;
+                }
+            }
+            //for(int i = 0; i < assignments.Count; i++)
+            //{
+            //    if (assignments[i].isDone)
+            //    {
+            //        Assignment task = assignments[i];
+            //        assignments.Remove(task);
+            //        assignments.Insert(assignments.Count, task);
+                    
+            //    }
+            //}
+
         }
         
     }

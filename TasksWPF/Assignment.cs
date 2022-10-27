@@ -14,8 +14,9 @@ namespace TasksWPF
             Date = DateTime.Now;
             isDone = false;
         }
+        public int Id { get; set; }
         public string Text { get; set; }
-        public bool isDone;
-        public DateTime Date;
+        public bool isDone { get; set;}
+        public DateTime Date { get; set; }
     }
 }
