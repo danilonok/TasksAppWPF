@@ -1,0 +1,44 @@
+﻿<Window x:Class="TasksWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TasksWPF"
+        mc:Ignorable="d"
+        Title="To Do" Height="600" Width="400">
+    <StackPanel >
+        <Label Margin="30 20 0 0" FontSize="20" FontWeight="SemiBold">To Do</Label>
+        <DockPanel Margin="30 8 30 0" Background="#F2F2F2" Height="40">
+            <Image Source="Images/plus.png" Margin="10 0 8 0" DockPanel.Dock="Left" HorizontalAlignment="Right" Height="28" Width="23">
+
+            </Image>
+            <Grid>
+                
+                <Label IsHitTestVisible="False" x:Name="inputHint" FontSize="14" Foreground="#979797" VerticalAlignment="Top" Margin="0,6,0,0" Grid.RowSpan="2">Add task to Outgoing assignments</Label>
+                <TextBox x:Name="inputBox" BorderThickness="0" TextChanged="inputBox_TextChanged"  VerticalAlignment="Center" FontSize="14" Background="Transparent" />
+            </Grid>
+        </DockPanel>
+        
+        <DockPanel Margin="30 10 40 0">
+            <Label FontSize="20">Outgoing assignments</Label>
+            <Label x:Name="counter" FontSize="20" Foreground="#999999" HorizontalAlignment="Left">10</Label>
+        </DockPanel>
+        <ScrollViewer CanContentScroll="True"  VerticalScrollBarVisibility="Auto" Height="400">
+            <StackPanel x:Name="mainPanel" Orientation="Vertical">
+                <!--
+                <StackPanel Margin="40 8 40 0">
+                    <RadioButton  VerticalContentAlignment="Center" FontSize="16" >Lorem ipsum dolor sit amet, consectetur</RadioButton>
+                    <StackPanel Orientation="Horizontal">
+                        <Label  Margin="14 0 0 0" Foreground="#6A6A6A">19.06.2022</Label>
+                        <Button Foreground= "#F23B3B" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0">Delete</Button>
+                    </StackPanel>
+                    
+                </StackPanel>
+-->
+                
+            </StackPanel>
+        </ScrollViewer>
+        
+
+    </StackPanel>
+</Window>
