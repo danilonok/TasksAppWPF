@@ -22,57 +22,38 @@ namespace TasksWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<Assignment> shownAssignments;
         AssignmentsController assignmentsController;
-        ApplicationContext db = new ApplicationContext();
         public MainWindow()
         {
             InitializeComponent();
             assignmentsController = new AssignmentsController();
-            Loaded += MainWindow_Loaded;
-            
-            shownAssignments = new List<Assignment>();
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
             UpdateList();
-            
+
         }
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            // гарантируем, что база данных создана
-            db.Database.EnsureCreated();
-            // загружаем данные из БД
-            db.Assignments.Load();
-            // и устанавливаем данные в качестве контекста
-            DataContext = db.Assignments.Local.ToObservableCollection();
-            assignmentsController.assignments = GetAll();
-            assignmentsController.Sort();
-            UpdateList();
-        }
+        
         void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                if (inputBox.Text != "")
+                if (inputBox.Text.Trim() != "")
                 {
-                    Assignment task = new Assignment(inputBox.Text);
-
+                    Assignment task = new Assignment(inputBox.Text.Trim());
                     assignmentsController.AddAssignment(task);
-                    db.Assignments.Add(task);
-                    
-                    db.SaveChanges();
-
                     inputBox.Text = "";
                 }
-                    
+
                 UpdateList();
             }
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Delete)
+            {
+                assignmentsController.Clear();
+                UpdateList();
+            }
+
         }
 
-        private List<Assignment> GetAll()
-        {
-            return db.Assignments.ToList();
-        }
-       
+        
         private void UpdateList()
         {
             mainPanel.Children.Clear();
@@ -85,8 +66,6 @@ namespace TasksWPF
 
         private void AddAssignment(Assignment assignment)
         {
-            
-
             StackPanel panel = new StackPanel();
             StackPanel smallPanel = new StackPanel();
             panel.Margin = new Thickness(30, 8, 40, 0);
@@ -97,7 +76,7 @@ namespace TasksWPF
             radioButton.IsChecked = assignment.isDone;
             radioButton.Checked += (sender, e) => RadioButton_Checked(sender, e, assignment.Id);
 
-            
+
             smallPanel.Orientation = Orientation.Horizontal;
             Label label = new Label();
             label.FontSize = 12;
@@ -120,29 +99,23 @@ namespace TasksWPF
                 panel.Opacity = 0.5f;
             }
             mainPanel.Children.Add(panel);
-            
+
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e, int id)
         {
-            Assignment task = db.Assignments.Find(id);
-
-            task.isDone = true;
+            Assignment task = assignmentsController.Find(id);
             assignmentsController.CompleteAssignment(task);
-            db.SaveChanges();
-            
             UpdateList();
         }
         private void deleteButton_clicked(object sender, RoutedEventArgs e, int id)
         {
-            if(MessageBox.Show("Are you sure to delete it?", "Deleting assignment", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Are you sure to delete it?", "Deleting assignment", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                Assignment task = db.Assignments.Find(id);
+                Assignment task = assignmentsController.Find(id);
                 assignmentsController.DeleteAssignment(task);
-                db.Assignments.Remove(task);
-                db.SaveChanges();
             }
-            
+
             UpdateList();
         }
 

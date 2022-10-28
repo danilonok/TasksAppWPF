@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TasksWPF"
         mc:Ignorable="d"
-        Title="To Do" Height="600" Width="400">
+        Title="Task Manager" Height="600" Width="400" Icon="Images/icon.png" MinHeight="600" MinWidth="400"
+         >
+    
     <StackPanel >
-        <Label Margin="30 20 0 0" FontSize="20" FontWeight="SemiBold">To Do</Label>
+        <Label Margin="30 20 0 0" FontSize="20" FontWeight="SemiBold">Task Manager</Label>
         <DockPanel Margin="30 8 30 0" Background="#F2F2F2" Height="40">
             <Image Source="Images/plus.png" Margin="10 0 8 0" DockPanel.Dock="Left" HorizontalAlignment="Right" Height="28" Width="23">
 
